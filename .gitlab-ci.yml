@@ -1,0 +1,72 @@
+variables:
+  DOCKER_DRIVER: overlay2
+  BUILD_IMAGE_NAME: "$CI_REGISTRY_IMAGE/branches/$CI_COMMIT_REF_SLUG:$CI_COMMIT_SHA"
+  RELEASE_IMAGE_NAME: "$CI_REGISTRY_IMAGE/releases/$TERRAFORM_VERSION"
+
+services:
+  - docker:19.03.5-dind
+
+stages:
+  - build
+  - test
+  - release
+
+.dind: &dind
+  image: docker:19.03.5
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+
+.build: &build
+  <<: &dind
+  stage: build
+  script:
+    - docker build --tag "$BUILD_IMAGE_NAME" --file "Dockerfile.$TERRAFORM_VERSION" .
+    - docker push "$BUILD_IMAGE_NAME"
+
+.test-unit: &test-unit
+  stage: test
+  image: "$BUILD_IMAGE_NAME"
+  script:
+    - terraform --version
+
+.release: &release
+  <<: &dind
+  stage: release
+  script:
+    - docker pull "$BUILD_IMAGE_NAME"
+    - docker tag "$BUILD_IMAGE_NAME" "$RELEASE_IMAGE_NAME"
+    - docker push "$RELEASE_IMAGE_NAME"
+  only:
+    - master
+
+.terraform-0.11: &terraform-0.11
+  variables:
+    TERRAFORM_VERSION: "0.11"
+
+.terraform-0.12: &terraform-0.12
+  variables:
+    TERRAFORM_VERSION: "0.12"
+
+build 0.11:
+  <<: &terraform-0.11
+  <<: &build
+
+build 0.12:
+  <<: &terraform-0.12
+  <<: &build
+
+test-unit 0.11:
+  <<: &terraform-0.11
+  <<: &test-unit
+
+test-unit 0.12:
+  <<: &terraform-0.12
+  <<: &test-unit
+
+release 0.11:
+  <<: &terraform-0.11
+  <<: &release
+
+release 0.12:
+  <<: &terraform-0.12
+  <<: &release
