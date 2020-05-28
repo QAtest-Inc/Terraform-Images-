@@ -1,5 +1,0 @@
-FROM hashicorp/terraform:0.11.13
-RUN apk add --no-cache jq
-
-# Override ENTRYPOINT since hashicorp/terraform uses `terraform`
-ENTRYPOINT []

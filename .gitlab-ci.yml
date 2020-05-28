@@ -19,7 +19,7 @@ stages:
   <<: *dind
   stage: build
   script:
-    - docker build --tag "$BUILD_IMAGE_NAME" --file "Dockerfile.$TERRAFORM_VERSION" .
+    - docker build --tag "$BUILD_IMAGE_NAME" --build-arg BASE=$TERRAFORM_BASE .
     - docker push "$BUILD_IMAGE_NAME"
 
 .test-unit: &test-unit
@@ -41,10 +41,12 @@ stages:
 
 .terraform-0.11: &terraform011
   variables:
+    TERRAFORM_BASE: "hashicorp/terraform:0.11.13"
     TERRAFORM_VERSION: "0.11"
 
 .terraform-0.12: &terraform012
   variables:
+    TERRAFORM_BASE: "hashicorp/terraform:0.12.26"
     TERRAFORM_VERSION: "0.12"
 
 build 0.11:
