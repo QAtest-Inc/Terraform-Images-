@@ -1,5 +1,5 @@
 variables:
-  BUILD_IMAGE_NAME: "$CI_REGISTRY_IMAGE/branches/$CI_COMMIT_REF_SLUG:$CI_COMMIT_SHA"
+  BUILD_IMAGE_NAME: "$CI_REGISTRY_IMAGE/branches/$CI_COMMIT_REF_SLUG-$TERRAFORM_VERSION:$CI_COMMIT_SHA"
   RELEASE_IMAGE_NAME: "$CI_REGISTRY_IMAGE/releases/$TERRAFORM_VERSION"
 
 services:
@@ -26,8 +26,8 @@ stages:
   stage: test
   image: "$BUILD_IMAGE_NAME"
   script:
-    - echo "Showing terraform version"
-    - which terraform
+    - terraform version
+    - jq --version
 
 .release: &release
   <<: *dind
@@ -56,9 +56,11 @@ build 0.12:
   <<: *build
 
 test-unit 0.11:
+  <<: *terraform011
   <<: *test-unit
 
 test-unit 0.12:
+  <<: *terraform012
   <<: *test-unit
 
 release 0.11:
