@@ -1,6 +1,7 @@
 variables:
   BUILD_IMAGE_NAME: "$CI_REGISTRY_IMAGE/branches/$CI_COMMIT_REF_SLUG-$TERRAFORM_VERSION:$CI_COMMIT_SHA"
   RELEASE_IMAGE_NAME: "$CI_REGISTRY_IMAGE/releases/$TERRAFORM_VERSION"
+  TF_ADDRESS: "$CI_API_V4_URL/projects/$CI_PROJECT_ID/terraform/state/$CI_JOB_ID"
 
 stages:
   - lint
@@ -29,6 +30,8 @@ stages:
     - terraform version
     - gitlab-terraform version
     - jq --version
+    - cd tests
+    - gitlab-terraform init
 
 .release: &release
   <<: *dind
