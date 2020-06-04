@@ -34,8 +34,7 @@ case "${1}" in
     terraform "${@}" -out="${plan_cache}"
   ;;
   "plan-json")
-    shift 1
-    terraform show --json "${plan_cache}" | \
+    terraform show -json "${plan_cache}" | \
       jq -r "${JQ_PLAN}" \
       > "${plan_json}"
   ;;

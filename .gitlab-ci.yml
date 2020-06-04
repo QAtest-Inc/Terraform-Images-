@@ -32,6 +32,10 @@ stages:
     - jq --version
     - cd tests
     - gitlab-terraform init
+    - gitlab-terraform plan
+    - if [[ ! -f "plan.cache" ]]; then echo "expected to find a plan.cache file"; exit 1; fi
+    - gitlab-terraform plan-json
+    - if [[ ! -f "plan.json" ]]; then echo "expected to find a plan.json file"; exit 1; fi
 
 .release: &release
   <<: *dind
