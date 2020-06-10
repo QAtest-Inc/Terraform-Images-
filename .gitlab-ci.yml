@@ -36,6 +36,7 @@ stages:
     - if [[ ! -f "plan.cache" ]]; then echo "expected to find a plan.cache file"; exit 1; fi
     - gitlab-terraform plan-json
     - if [[ ! -f "plan.json" ]]; then echo "expected to find a plan.json file"; exit 1; fi
+    - gitlab-terraform apply
 
 .release: &release
   <<: *dind
@@ -47,10 +48,10 @@ stages:
   only:
     - master
 
-.terraform-0.11: &terraform011
+.terraform-0.13: &terraform013
   variables:
-    TERRAFORM_BASE: "hashicorp/terraform:0.11.13"
-    TERRAFORM_VERSION: "0.11"
+    TERRAFORM_BASE: "hashicorp/terraform:0.13.0-beta1"
+    TERRAFORM_VERSION: "0.13"
 
 .terraform-0.12: &terraform012
   variables:
@@ -65,24 +66,24 @@ shell check:
   script:
     - shellcheck src/**/*.sh
 
-build 0.11:
-  <<: *terraform011
+build 0.13:
+  <<: *terraform013
   <<: *build
 
 build 0.12:
   <<: *terraform012
   <<: *build
 
-test-unit 0.11:
-  <<: *terraform011
+test-unit 0.13:
+  <<: *terraform013
   <<: *test-unit
 
 test-unit 0.12:
   <<: *terraform012
   <<: *test-unit
 
-release 0.11:
-  <<: *terraform011
+release 0.13:
+  <<: *terraform013
   <<: *release
 
 release 0.12:
