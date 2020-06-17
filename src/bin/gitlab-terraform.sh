@@ -15,6 +15,17 @@ JQ_PLAN='
   }
 '
 
+# If TF_USERNAME is unset then default to GITLAB_USER_LOGIN
+if [ -z "${TF_USERNAME}" ]; then
+  TF_USERNAME="${GITLAB_USER_LOGIN}"
+fi
+
+# If TF_PASSWORD is unset then default to gitlab-ci-token/CI_JOB_TOKEN
+if [ -z "${TF_PASSWORD}" ]; then
+  TF_USERNAME="gitlab-ci-token"
+  TF_PASSWORD="${CI_JOB_TOKEN}"
+fi
+
 case "${1}" in
   "apply")
     terraform "${@}" -input=false "${plan_cache}"
@@ -24,8 +35,8 @@ case "${1}" in
       -backend-config="address=${TF_ADDRESS}" \
       -backend-config="lock_address=${TF_ADDRESS}/lock" \
       -backend-config="unlock_address=${TF_ADDRESS}/lock" \
-      -backend-config="username=${GITLAB_USER_LOGIN}" \
-      -backend-config="password=${GITLAB_TF_PASSWORD}" \
+      -backend-config="username=${TF_USERNAME}" \
+      -backend-config="password=${TF_PASSWORD}" \
       -backend-config="lock_method=POST" \
       -backend-config="unlock_method=DELETE" \
       -backend-config="retry_wait_min=5"
