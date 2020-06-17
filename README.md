@@ -17,13 +17,13 @@ Should be the backend url. For the GitLab backend it will be something like,
 - `{PROJECT_ID}` is the id of the project you're using as your infrastructure as code.
 - `{STATE_NAME}` can be arbitrarily defined to the Terraform state name one wants to create.
 
-### `GITLAB_USER_LOGIN`
+### `TF_USERNAME`
 
-Is your user login name, which must have maintainer access.
+Is your user login name, which must have maintainer access. If this is unset, it will default to the value of GITLAB_USER_LOGIN which is the username that triggered the build.
 
-### `GITLAB_TF_PASSWORD`
+### `TF_PASSWORD`
 
-An access token created for the above maintainer with the api scope.
+An access token created for the above maintainer with the api scope. If this is unset, it will default to the value of CI_JOB_TOKEN and override the TF_USERNAME to match.
 
 # How to contribute?
 
