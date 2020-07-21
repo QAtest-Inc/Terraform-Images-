@@ -50,12 +50,12 @@ stages:
 
 .terraform-0.13: &terraform013
   variables:
-    TERRAFORM_BASE: "hashicorp/terraform:0.13.0-beta1"
+    TERRAFORM_BASE: "hashicorp/terraform:0.13.0-beta3"
     TERRAFORM_VERSION: "0.13"
 
 .terraform-0.12: &terraform012
   variables:
-    TERRAFORM_BASE: "hashicorp/terraform:0.12.26"
+    TERRAFORM_BASE: "hashicorp/terraform:0.12.28"
     TERRAFORM_VERSION: "0.12"
 
 shell check:
