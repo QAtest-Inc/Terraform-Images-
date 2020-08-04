@@ -1,4 +1,6 @@
 variables:
+  STABLE_VERSION: "0.12"
+  STABLE_IMAGE_NAME: "$CI_REGISTRY_IMAGE/stable:latest"
   BUILD_IMAGE_NAME: "$CI_REGISTRY_IMAGE/branches/$CI_COMMIT_REF_SLUG-$TERRAFORM_VERSION:$CI_COMMIT_SHA"
   RELEASE_IMAGE_NAME: "$CI_REGISTRY_IMAGE/releases/$TERRAFORM_VERSION"
   TF_ADDRESS: "$CI_API_V4_URL/projects/$CI_PROJECT_ID/terraform/state/$CI_JOB_ID"
@@ -48,6 +50,8 @@ stages:
     - docker image tag "$BUILD_IMAGE_NAME" "$RELEASE_IMAGE_NAME:$CI_COMMIT_TAG"
     - docker image push "$RELEASE_IMAGE_NAME:latest"
     - docker image push "$RELEASE_IMAGE_NAME:$CI_COMMIT_TAG"
+    - if [ "$TERRAFORM_VERSION" = "$STABLE_VERSION" ]; then docker image tag "$BUILD_IMAGE_NAME" "$STABLE_IMAGE_NAME"; fi
+    - if [ "$TERRAFORM_VERSION" = "$STABLE_VERSION" ]; then docker image push "$STABLE_IMAGE_NAME"; fi
 
   only:
     - tags

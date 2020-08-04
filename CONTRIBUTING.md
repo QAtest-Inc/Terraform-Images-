@@ -22,3 +22,11 @@ an empty commit sumarizing your changes like so:
 
 ```
 git commit --allow-empty -m '[BREAKING CHANGE|feat|fix]: <changelog summary message
+
+### Stable tag
+
+This project updates a `stable:latest` tag in the container registry which
+tracks the latest build of the image specified in `STABLE_VERSION` in
+`.gitlab-ci.yml`. Simply update this to reflect what version series is
+considered stable by upstream and the `stable:latest` tag will be updated
+automatically.
