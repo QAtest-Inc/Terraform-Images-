@@ -33,6 +33,6 @@ If there's no other issue already discussing what you want, simply open a new is
 
 # Release
 
-Currently we release two versions of this image. One with support for terraform 0.12 and the other for 0.13 (beta). We're still deciding on how many and which versions versions of terraform we want to support. For now, we're testing and building for these two. Our main idea was to guarantee support for the last two stables, but using 0.11 was requiring some smelly workaround setup to make it working, we decided to not guarantee support for it for now.
+Currently we release two versions of this image. One with support for terraform 0.12 and the other for 0.13. We're still deciding on how many and which versions of terraform we want to support. For now, we're testing and building for these two. Our main idea was to guarantee support for the last two stables.
 
 Each released image will be updated whenever a new change is pushed to master. We plan to introduce [Semantic Versioning with Conventional Commits](https://gitlab.com/gitlab-org/terraform-images/-/issues/1) soon.
