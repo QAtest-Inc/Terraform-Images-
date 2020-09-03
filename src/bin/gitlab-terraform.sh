@@ -26,22 +26,29 @@ if [ -z "${TF_PASSWORD}" ]; then
   TF_PASSWORD="${CI_JOB_TOKEN}"
 fi
 
+init() {
+  terraform init \
+    -backend-config="address=${TF_ADDRESS}" \
+    -backend-config="lock_address=${TF_ADDRESS}/lock" \
+    -backend-config="unlock_address=${TF_ADDRESS}/lock" \
+    -backend-config="username=${TF_USERNAME}" \
+    -backend-config="password=${TF_PASSWORD}" \
+    -backend-config="lock_method=POST" \
+    -backend-config="unlock_method=DELETE" \
+    -backend-config="retry_wait_min=5" \
+    -reconfigure
+}
+
 case "${1}" in
   "apply")
+    init
     terraform "${@}" -input=false "${plan_cache}"
   ;;
   "init")
-    terraform "${@}" \
-      -backend-config="address=${TF_ADDRESS}" \
-      -backend-config="lock_address=${TF_ADDRESS}/lock" \
-      -backend-config="unlock_address=${TF_ADDRESS}/lock" \
-      -backend-config="username=${TF_USERNAME}" \
-      -backend-config="password=${TF_PASSWORD}" \
-      -backend-config="lock_method=POST" \
-      -backend-config="unlock_method=DELETE" \
-      -backend-config="retry_wait_min=5"
+    init
   ;;
   "plan")
+    init
     terraform "${@}" -out="${plan_cache}"
   ;;
   "plan-json")
