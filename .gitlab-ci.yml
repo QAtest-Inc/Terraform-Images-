@@ -58,7 +58,7 @@ stages:
 
 .terraform-0.13: &terraform013
   variables:
-    TERRAFORM_BASE: "hashicorp/terraform:0.13.1"
+    TERRAFORM_BASE: "hashicorp/terraform:0.13.2"
     TERRAFORM_VERSION: "0.13"
 
 .terraform-0.12: &terraform012
