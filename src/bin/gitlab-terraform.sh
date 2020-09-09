@@ -32,15 +32,17 @@ if [ -z "${TF_PASSWORD}" ]; then
   TF_PASSWORD="${CI_JOB_TOKEN}"
 fi
 
-# Export variables for the HTTP backend
-export TF_HTTP_ADDRESS="${TF_ADDRESS}"
-export TF_HTTP_LOCK_ADDRESS="${TF_ADDRESS}/lock"
-export TF_HTTP_LOCK_METHOD="POST"
-export TF_HTTP_UNLOCK_ADDRESS="${TF_ADDRESS}/lock"
-export TF_HTTP_UNLOCK_METHOD="DELETE"
-export TF_HTTP_USERNAME="${TF_USERNAME}"
-export TF_HTTP_PASSWORD="${TF_PASSWORD}"
-export TF_HTTP_RETRY_WAIT_MIN="5"
+# Export variables for the HTTP backend if TF_ADDRESS is set
+if [ -n "${TF_ADDRESS}" ]; then
+  export TF_HTTP_ADDRESS="${TF_ADDRESS}"
+  export TF_HTTP_LOCK_ADDRESS="${TF_ADDRESS}/lock"
+  export TF_HTTP_LOCK_METHOD="POST"
+  export TF_HTTP_UNLOCK_ADDRESS="${TF_ADDRESS}/lock"
+  export TF_HTTP_UNLOCK_METHOD="DELETE"
+  export TF_HTTP_USERNAME="${TF_USERNAME}"
+  export TF_HTTP_PASSWORD="${TF_PASSWORD}"
+  export TF_HTTP_RETRY_WAIT_MIN="5"
+fi
 
 init() {
   if terraform_is_at_least 0.13.2; then
