@@ -44,27 +44,32 @@ if [ -n "${TF_ADDRESS}" ]; then
   export TF_HTTP_RETRY_WAIT_MIN="5"
 fi
 
-init() {
-  if terraform_is_at_least 0.13.2; then
-    terraform init -reconfigure
-  else
-    terraform init \
-      -backend-config="address=${TF_HTTP_ADDRESS}" \
-      -backend-config="lock_address=${TF_HTTP_LOCK_ADDRESS}" \
-      -backend-config="unlock_address=${TF_HTTP_UNLOCK_ADDRESS}" \
-      -backend-config="username=${TF_HTTP_USERNAME}" \
-      -backend-config="password=${TF_HTTP_PASSWORD}" \
-      -backend-config="lock_method=${TF_HTTP_LOCK_METHOD}" \
-      -backend-config="unlock_method=${TF_HTTP_UNLOCK_METHOD}" \
-      -backend-config="retry_wait_min=${TF_HTTP_RETRY_WAIT_MIN}" \
-      -reconfigure
+apply() {
+  if ! terraform_is_at_least 0.13.2; then
+    tfplantool -f "${plan_cache}" backend set -k password -v "${TF_PASSWORD}"
   fi
+  terraform "${@}" -input=false "${plan_cache}"
+}
+
+init() {
+  if [ -n "${TF_ADDRESS}" ] && ! terraform_is_at_least 0.13.2; then
+    set -- \
+      -backend-config=address="${TF_HTTP_ADDRESS}" \
+      -backend-config=lock_address="${TF_HTTP_LOCK_ADDRESS}" \
+      -backend-config=unlock_address="${TF_HTTP_UNLOCK_ADDRESS}" \
+      -backend-config=username="${TF_HTTP_USERNAME}" \
+      -backend-config=password="${TF_HTTP_PASSWORD}" \
+      -backend-config=lock_method="${TF_HTTP_LOCK_METHOD}" \
+      -backend-config=unlock_method="${TF_HTTP_UNLOCK_METHOD}" \
+      -backend-config=retry_wait_min="${TF_HTTP_RETRY_WAIT_MIN}"
+  fi
+  terraform init "${@}" -reconfigure
 }
 
 case "${1}" in
   "apply")
     init
-    terraform "${@}" -input=false "${plan_cache}"
+    apply "${@}"
   ;;
   "init")
     init
