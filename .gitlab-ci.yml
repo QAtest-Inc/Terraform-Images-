@@ -4,13 +4,24 @@ variables:
   BUILD_IMAGE_NAME: "$CI_REGISTRY_IMAGE/branches/$CI_COMMIT_REF_SLUG-$TERRAFORM_VERSION:$CI_COMMIT_SHA"
   RELEASE_IMAGE_NAME: "$CI_REGISTRY_IMAGE/releases/$TERRAFORM_VERSION"
   TF_ADDRESS: "$CI_API_V4_URL/projects/$CI_PROJECT_ID/terraform/state/$CI_JOB_ID"
+  TFPLANTOOL_VERSION: "v0.1.0"
 
 stages:
   - lint
   - build
-  - test
+  - test-init
+  - test-plan
+  - test-apply
   - prepare-release
   - release
+
+shell check:
+  stage: lint
+  image: koalaman/shellcheck-alpine:stable
+  before_script:
+    - shellcheck --version
+  script:
+    - shellcheck src/**/*.sh
 
 .dind: &dind
   services:
@@ -23,22 +34,46 @@ stages:
   <<: *dind
   stage: build
   script:
-    - docker image build --tag "$BUILD_IMAGE_NAME" --build-arg BASE=$TERRAFORM_BASE .
+    - docker image build --tag "$BUILD_IMAGE_NAME" --build-arg BASE=$TERRAFORM_BASE --build-arg TFPLANTOOL=$TFPLANTOOL_VERSION .
     - docker image push "$BUILD_IMAGE_NAME"
 
-.test-unit: &test-unit
-  stage: test
+.test: &test
   image: "$BUILD_IMAGE_NAME"
-  script:
+  before_script:
     - terraform version
     - gitlab-terraform version
     - jq --version
     - cd tests
+  cache:
+    key: "$TERRAFORM_VERSION-$CI_COMMIT_REF_SLUG"
+    paths:
+      - tests/.terraform/
+
+.test-init: &test-init
+  <<: *test
+  stage: test-init
+  script:
     - gitlab-terraform init
+
+.test-plan: &test-plan
+  <<: *test
+  stage: test-plan
+  script:
     - gitlab-terraform plan
     - if [[ ! -f "plan.cache" ]]; then echo "expected to find a plan.cache file"; exit 1; fi
+    - tfplantool -f plan.cache backend get -k username
     - gitlab-terraform plan-json
     - if [[ ! -f "plan.json" ]]; then echo "expected to find a plan.json file"; exit 1; fi
+    - mv plan.cache $TERRAFORM_VERSION-plan.cache
+  artifacts:
+    paths:
+      - "tests/*-plan.cache"
+
+.test-apply: &test-apply
+  <<: *test
+  stage: test-apply
+  script:
+    - mv $TERRAFORM_VERSION-plan.cache plan.cache
     - gitlab-terraform apply
 
 .release: &release
@@ -52,51 +87,8 @@ stages:
     - docker image push "$RELEASE_IMAGE_NAME:$CI_COMMIT_TAG"
     - if [ "$TERRAFORM_VERSION" = "$STABLE_VERSION" ]; then docker image tag "$BUILD_IMAGE_NAME" "$STABLE_IMAGE_NAME"; fi
     - if [ "$TERRAFORM_VERSION" = "$STABLE_VERSION" ]; then docker image push "$STABLE_IMAGE_NAME"; fi
-
   only:
     - tags
-
-.terraform-0.13: &terraform013
-  variables:
-    TERRAFORM_BASE: "hashicorp/terraform:0.13.2"
-    TERRAFORM_VERSION: "0.13"
-
-.terraform-0.12: &terraform012
-  variables:
-    TERRAFORM_BASE: "hashicorp/terraform:0.12.29"
-    TERRAFORM_VERSION: "0.12"
-
-shell check:
-  stage: lint
-  image: koalaman/shellcheck-alpine:stable
-  before_script:
-    - shellcheck --version
-  script:
-    - shellcheck src/**/*.sh
-
-build 0.13:
-  <<: *terraform013
-  <<: *build
-
-build 0.12:
-  <<: *terraform012
-  <<: *build
-
-test-unit 0.13:
-  <<: *terraform013
-  <<: *test-unit
-
-test-unit 0.12:
-  <<: *terraform012
-  <<: *test-unit
-
-release 0.13:
-  <<: *terraform013
-  <<: *release
-
-release 0.12:
-  <<: *terraform012
-  <<: *release
 
 .semantic-release:
   image: node:12-buster-slim
@@ -123,3 +115,55 @@ tag_release:
   only:
     refs:
       - master@gitlab-org/terraform-images
+
+# Terraform 0.13
+.terraform-0.13: &terraform013
+  variables:
+    TERRAFORM_BASE: "hashicorp/terraform:0.13.2"
+    TERRAFORM_VERSION: "0.13"
+
+build 0.13:
+  <<: *terraform013
+  <<: *build
+
+test-init 0.13:
+  <<: *terraform013
+  <<: *test-init
+
+test-plan 0.13:
+  <<: *terraform013
+  <<: *test-plan
+
+test-apply 0.13:
+  <<: *terraform013
+  <<: *test-apply
+
+release 0.13:
+  <<: *terraform013
+  <<: *release
+
+# Terraform 0.12
+.terraform-0.12: &terraform012
+  variables:
+    TERRAFORM_BASE: "hashicorp/terraform:0.12.29"
+    TERRAFORM_VERSION: "0.12"
+
+build 0.12:
+  <<: *terraform012
+  <<: *build
+
+test-init 0.12:
+  <<: *terraform012
+  <<: *test-init
+
+test-plan 0.12:
+  <<: *terraform012
+  <<: *test-plan
+
+test-apply 0.12:
+  <<: *terraform012
+  <<: *test-apply
+
+release 0.12:
+  <<: *terraform012
+  <<: *release
