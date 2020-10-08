@@ -1,0 +1,3 @@
+[submodule "examples/gitlab-terraform-aws"]
+	path = examples/gitlab-terraform-aws
+	url = https://gitlab.com/gitlab-org/configure/examples/gitlab-terraform-aws
