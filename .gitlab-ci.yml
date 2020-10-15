@@ -104,6 +104,10 @@ release:
     - if [ "$TERRAFORM_VERSION" = "$STABLE_VERSION" ]; then docker image push "$STABLE_IMAGE_NAME"; fi
   only:
     - tags
+  except:
+    changes:
+      - examples/**/*
+
 
 .semantic-release:
   image: node:12-buster-slim
