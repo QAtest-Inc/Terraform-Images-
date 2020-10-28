@@ -6,7 +6,7 @@ variables:
   TF_ADDRESS: "$CI_API_V4_URL/projects/$CI_PROJECT_ID/terraform/state/$CI_PIPELINE_IID-$STATE_NAME"
   TFPLANTOOL_VERSION: "v0.1.0"
 
-.versions: &versions
+.versions:
   parallel:
     matrix:
       - TERRAFORM_BASE: "hashicorp/terraform:0.13.4"
@@ -33,7 +33,7 @@ shell check:
   script:
     - shellcheck src/**/*.sh
 
-.dind: &dind
+.dind:
   services:
     - docker:19.03.5-dind
   image: docker:19.03.5
@@ -41,14 +41,15 @@ shell check:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
 
 build:
-  <<: *dind
-  <<: *versions
+  extends:
+    - .dind
+    - .versions
   stage: build
   script:
     - docker image build --tag "$BUILD_IMAGE_NAME" --build-arg BASE=$TERRAFORM_BASE --build-arg TFPLANTOOL=$TFPLANTOOL_VERSION .
     - docker image push "$BUILD_IMAGE_NAME"
 
-.test: &test
+.test:
   image: "$BUILD_IMAGE_NAME"
   before_script:
     - terraform version
@@ -61,15 +62,17 @@ build:
       - tests/.terraform/
 
 test-init:
-  <<: *test
-  <<: *versions
+  extends:
+    - .test
+    - .versions
   stage: test-init
   script:
     - gitlab-terraform init
 
 test-plan:
-  <<: *test
-  <<: *versions
+  extends:
+    - .test
+    - .versions
   stage: test-plan
   script:
     - gitlab-terraform plan
@@ -83,16 +86,18 @@ test-plan:
       - "tests/*-plan.cache"
 
 test-apply:
-  <<: *test
-  <<: *versions
+  extends:
+    - .test
+    - .versions
   stage: test-apply
   script:
     - mv $TERRAFORM_VERSION-plan.cache plan.cache
     - gitlab-terraform apply
 
 release:
-  <<: *dind
-  <<: *versions
+  extends:
+    - .dind
+    - .versions
   stage: release
   script:
     - docker image pull "$BUILD_IMAGE_NAME"
