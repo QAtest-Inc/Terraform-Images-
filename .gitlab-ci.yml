@@ -5,6 +5,7 @@ variables:
   RELEASE_IMAGE_NAME: "$CI_REGISTRY_IMAGE/releases/$TERRAFORM_VERSION"
   TF_ADDRESS: "$CI_API_V4_URL/projects/$CI_PROJECT_ID/terraform/state/$CI_PIPELINE_IID-$STATE_NAME"
   TFPLANTOOL_VERSION: "v0.1.0"
+  BASE: "node:alpine"
 
 .versions:
   parallel:
@@ -46,7 +47,7 @@ build:
     - .versions
   stage: build
   script:
-    - docker image build --tag "$BUILD_IMAGE_NAME" --build-arg BASE=$TERRAFORM_BASE --build-arg TFPLANTOOL=$TFPLANTOOL_VERSION .
+    - docker image build --tag "$BUILD_IMAGE_NAME" --build-arg BASE=$BASE --build-arg TERRAFORM_BASE=$TERRAFORM_BASE --build-arg TFPLANTOOL=$TFPLANTOOL_VERSION .
     - docker image push "$BUILD_IMAGE_NAME"
 
 .test:
@@ -55,6 +56,7 @@ build:
     - terraform version
     - gitlab-terraform version
     - jq --version
+    - cdktf --version
     - cd tests
   cache:
     key: "$TERRAFORM_VERSION-$CI_COMMIT_REF_SLUG"
