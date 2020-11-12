@@ -52,6 +52,10 @@ apply() {
   terraform "${@}" -input=false "${plan_cache}"
 }
 
+destroy() {
+  terraform "${@}" -auto-approve
+}
+
 init() {
   if [ -n "${TF_HTTP_ADDRESS}" ] && ! terraform_is_at_least 0.13.2; then
     set -- \
@@ -83,6 +87,10 @@ case "${1}" in
     terraform show -json "${plan_cache}" | \
       jq -r "${JQ_PLAN}" \
       > "${plan_json}"
+  ;;
+  "destroy")
+    init
+    destroy "${@}"
   ;;
   *)
     terraform "${@}"
