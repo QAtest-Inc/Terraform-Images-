@@ -22,6 +22,7 @@ stages:
   - test-init
   - test-plan
   - test-apply
+  - test-destroy
   - prepare-release
   - release
 
@@ -93,6 +94,14 @@ test-apply:
   script:
     - mv $TERRAFORM_VERSION-plan.cache plan.cache
     - gitlab-terraform apply
+
+test-destroy:
+  extends:
+    - .test
+    - .versions
+  stage: test-destroy
+  script:
+    - gitlab-terraform destroy
 
 release:
   extends:
