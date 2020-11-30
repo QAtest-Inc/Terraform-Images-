@@ -1,6 +1,6 @@
 # Terraform Images
 
-This repository provides a docker image which contains the `gitlab-terraform` shell script. This script is a thin wrapper around the `terraform` binary. It's main purpose is to serve the [Infrastructure as code with Terraform and GitLab
+This repository provides a docker image which contains the `gitlab-terraform` shell script. This script is a thin wrapper around the `terraform` binary. Its main purpose is to serve the [Infrastructure as code with Terraform and GitLab
 ](https://docs.gitlab.com/ee/user/infrastructure/), by extracting some of the standard configuration a user would need to set up to use the Terraform backend on GitLab as well as the Terraform merge request widget.
 
 # How to use it
