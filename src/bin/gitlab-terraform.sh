@@ -6,7 +6,9 @@ terraform_is_at_least() {
   return $?
 }
 
-set -x
+if [ "${DEBUG_OUTPUT}" = "true" ]; then
+    set -x
+fi
 
 plan_cache="plan.cache"
 plan_json="plan.json"
