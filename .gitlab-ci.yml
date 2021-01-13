@@ -56,7 +56,6 @@ build:
 .test:
   image: "$BUILD_IMAGE_NAME"
   before_script:
-    - terraform version
     - gitlab-terraform version
     - jq --version
     - cd tests
