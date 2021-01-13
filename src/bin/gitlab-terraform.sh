@@ -45,6 +45,9 @@ export TF_HTTP_USERNAME="${TF_HTTP_USERNAME:-${TF_USERNAME}}"
 export TF_HTTP_PASSWORD="${TF_HTTP_PASSWORD:-${TF_PASSWORD}}"
 export TF_HTTP_RETRY_WAIT_MIN="${TF_HTTP_RETRY_WAIT_MIN:-5}"
 
+# Use terraform automation mode (will remove some verbose unneeded messages)
+export TF_IN_AUTOMATION=true
+
 apply() {
   if ! terraform_is_at_least 0.13.2; then
     tfplantool -f "${plan_cache}" backend set -k password -v "${TF_PASSWORD}"
