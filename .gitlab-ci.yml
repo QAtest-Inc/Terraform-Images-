@@ -9,13 +9,13 @@ variables:
 .versions:
   parallel:
     matrix:
-      - TERRAFORM_BASE: "hashicorp/terraform:0.14.2"
+      - TERRAFORM_BASE: "hashicorp/terraform:0.14.4"
         TERRAFORM_VERSION: "0.14"
         STATE_NAME: terraform014
-      - TERRAFORM_BASE: "hashicorp/terraform:0.13.5"
+      - TERRAFORM_BASE: "hashicorp/terraform:0.13.6"
         TERRAFORM_VERSION: "0.13"
         STATE_NAME: terraform013
-      - TERRAFORM_BASE: "hashicorp/terraform:0.12.29"
+      - TERRAFORM_BASE: "hashicorp/terraform:0.12.30"
         TERRAFORM_VERSION: "0.12"
         STATE_NAME: terraform012
 
