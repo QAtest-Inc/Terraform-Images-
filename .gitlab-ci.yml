@@ -23,6 +23,7 @@ stages:
   - lint
   - build
   - test-init
+  - test-validate
   - test-plan
   - test-apply
   - test-destroy
@@ -72,6 +73,14 @@ test-init:
   stage: test-init
   script:
     - gitlab-terraform init
+
+test-validate:
+  extends:
+    - .test
+    - .versions
+  stage: test-validate
+  script:
+    - gitlab-terraform validate
 
 test-plan:
   extends:
