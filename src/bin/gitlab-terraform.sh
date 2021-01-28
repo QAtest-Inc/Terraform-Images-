@@ -77,6 +77,10 @@ init() {
 }
 
 case "${1}" in
+  "validate")
+    init
+    terraform "${@}"
+  ;;
   "apply")
     init
     apply "${@}"
