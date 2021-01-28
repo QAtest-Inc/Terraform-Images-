@@ -86,7 +86,7 @@ case "${1}" in
   ;;
   "plan")
     init
-    terraform "${@}" -out="${plan_cache}"
+    terraform "${@}" -input=false -out="${plan_cache}"
   ;;
   "plan-json")
     terraform show -json "${plan_cache}" | \
