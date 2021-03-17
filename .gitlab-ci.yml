@@ -9,16 +9,20 @@ variables:
 .versions:
   parallel:
     matrix:
-      - TERRAFORM_BASE: "hashicorp/terraform:0.15.0"
+      - BASE_IMAGE: "alpine:3.13.1"
+        TERRAFORM_BINARY_VERSION: "0.15.0"
         TERRAFORM_VERSION: "0.15"
         STATE_NAME: terraform015
-      - TERRAFORM_BASE: "hashicorp/terraform:0.14.8"
+      - BASE_IMAGE: "alpine:3.13.1"
+        TERRAFORM_BINARY_VERSION: "0.14.8"
         TERRAFORM_VERSION: "0.14"
         STATE_NAME: terraform014
-      - TERRAFORM_BASE: "hashicorp/terraform:0.13.6"
+      - BASE_IMAGE: "alpine:3.13.1"
+        TERRAFORM_BINARY_VERSION: "0.13.6"
         TERRAFORM_VERSION: "0.13"
         STATE_NAME: terraform013
-      - TERRAFORM_BASE: "hashicorp/terraform:0.12.30"
+      - BASE_IMAGE: "alpine:3.13.1"
+        TERRAFORM_BINARY_VERSION: "0.12.30"
         TERRAFORM_VERSION: "0.12"
         STATE_NAME: terraform012
 
@@ -41,6 +45,14 @@ shell check:
   script:
     - shellcheck src/**/*.sh
 
+dockerfile check:
+  stage: lint
+  image: hadolint/hadolint:latest-alpine
+  before_script:
+    - hadolint --version
+  script:
+    - hadolint Dockerfile
+
 .dind:
   services:
     - docker:19.03.5-dind
@@ -54,7 +66,7 @@ build:
     - .versions
   stage: build
   script:
-    - docker image build --tag "$BUILD_IMAGE_NAME" --build-arg BASE=$TERRAFORM_BASE --build-arg TFPLANTOOL=$TFPLANTOOL_VERSION .
+    - docker image build --tag "$BUILD_IMAGE_NAME" --build-arg BASE_IMAGE=$BASE_IMAGE --build-arg TERRAFORM_BINARY_VERSION=$TERRAFORM_BINARY_VERSION --build-arg TFPLANTOOL_VERSION=$TFPLANTOOL_VERSION .
     - docker image push "$BUILD_IMAGE_NAME"
 
 .test:
@@ -126,10 +138,10 @@ release:
   script:
     - docker image pull "$BUILD_IMAGE_NAME"
     - docker image tag "$BUILD_IMAGE_NAME" "$RELEASE_IMAGE_NAME:latest"
-    - docker image tag "$BUILD_IMAGE_NAME" "$CI_REGISTRY_IMAGE/releases/terraform:${TERRAFORM_BASE##*:}"
+    - docker image tag "$BUILD_IMAGE_NAME" "$CI_REGISTRY_IMAGE/releases/terraform:$TERRAFORM_BINARY_VERSION"
     - docker image tag "$BUILD_IMAGE_NAME" "$RELEASE_IMAGE_NAME:$CI_COMMIT_TAG"
     - docker image push "$RELEASE_IMAGE_NAME:latest"
-    - docker image push "$CI_REGISTRY_IMAGE/releases/terraform:${TERRAFORM_BASE##*:}"
+    - docker image push "$CI_REGISTRY_IMAGE/releases/terraform:$TERRAFORM_BINARY_VERSION"
     - docker image push "$RELEASE_IMAGE_NAME:$CI_COMMIT_TAG"
     - if [ "$TERRAFORM_VERSION" = "$STABLE_VERSION" ]; then docker image tag "$BUILD_IMAGE_NAME" "$STABLE_IMAGE_NAME"; fi
     - if [ "$TERRAFORM_VERSION" = "$STABLE_VERSION" ]; then docker image push "$STABLE_IMAGE_NAME"; fi
