@@ -6,7 +6,6 @@ variables:
   TF_ADDRESS: "$CI_API_V4_URL/projects/$CI_PROJECT_ID/terraform/state/$CI_PIPELINE_IID-$STATE_NAME"
   TFPLANTOOL_VERSION: "v0.1.0"
 
-# NOTE: We currently support only >= 0.12 stable versions of Terraform
 .versions:
   parallel:
     matrix:
