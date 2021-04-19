@@ -1,5 +1,5 @@
 variables:
-  STABLE_VERSION: "0.14"
+  STABLE_VERSION: "0.15"
   STABLE_IMAGE_NAME: "$CI_REGISTRY_IMAGE/stable:latest"
   BUILD_IMAGE_NAME: "$CI_REGISTRY_IMAGE/branches/$CI_COMMIT_REF_SLUG-$TERRAFORM_VERSION:$CI_COMMIT_SHA"
   RELEASE_IMAGE_NAME: "$CI_REGISTRY_IMAGE/releases/$TERRAFORM_VERSION"
@@ -9,6 +9,9 @@ variables:
 .versions:
   parallel:
     matrix:
+      - TERRAFORM_BASE: "hashicorp/terraform:0.15.0"
+        TERRAFORM_VERSION: "0.15"
+        STATE_NAME: terraform015
       - TERRAFORM_BASE: "hashicorp/terraform:0.14.8"
         TERRAFORM_VERSION: "0.14"
         STATE_NAME: terraform014
