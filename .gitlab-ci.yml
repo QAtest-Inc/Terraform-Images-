@@ -10,19 +10,19 @@ variables:
   parallel:
     matrix:
       - BASE_IMAGE: "alpine:3.13.1"
-        TERRAFORM_BINARY_VERSION: "0.15.0"
+        TERRAFORM_BINARY_VERSION: "0.15.1"
         TERRAFORM_VERSION: "0.15"
         STATE_NAME: terraform015
       - BASE_IMAGE: "alpine:3.13.1"
-        TERRAFORM_BINARY_VERSION: "0.14.8"
+        TERRAFORM_BINARY_VERSION: "0.14.11"
         TERRAFORM_VERSION: "0.14"
         STATE_NAME: terraform014
       - BASE_IMAGE: "alpine:3.13.1"
-        TERRAFORM_BINARY_VERSION: "0.13.6"
+        TERRAFORM_BINARY_VERSION: "0.13.7"
         TERRAFORM_VERSION: "0.13"
         STATE_NAME: terraform013
       - BASE_IMAGE: "alpine:3.13.1"
-        TERRAFORM_BINARY_VERSION: "0.12.30"
+        TERRAFORM_BINARY_VERSION: "0.12.31"
         TERRAFORM_VERSION: "0.12"
         STATE_NAME: terraform012
 
