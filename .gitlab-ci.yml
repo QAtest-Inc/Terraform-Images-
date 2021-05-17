@@ -55,8 +55,8 @@ dockerfile check:
 
 .dind:
   services:
-    - docker:19.03.5-dind
-  image: docker:19.03.5
+    - docker:20.10.6-dind
+  image: docker:20.10.6
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
 
