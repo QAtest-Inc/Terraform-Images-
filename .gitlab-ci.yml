@@ -9,7 +9,7 @@ variables:
 .versions:
   parallel:
     matrix:
-      - BASE_IMAGE: "alpine:3.13.5"
+      - BASE_IMAGE: "alpine:3.13.1"
         TERRAFORM_BINARY_VERSION: "0.15.3"
         TERRAFORM_VERSION: "0.15"
         STATE_NAME: terraform015
