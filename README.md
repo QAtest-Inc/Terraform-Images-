@@ -39,4 +39,4 @@ the conventions of [Conventional Commits (v1.0.0)](https://www.conventionalcommi
 
 # Release
 
-Currently we release two versions of this image. One with support for terraform 0.12 and the other for 0.13. We're still deciding on how many and which versions of terraform we want to support. For now, we're testing and building for these two. Our main idea was to guarantee support for the last two stables.
+Currently we release three versions of this image to support the last three stable major versions of Terraform. 
