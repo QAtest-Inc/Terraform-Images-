@@ -51,9 +51,6 @@ export TF_HTTP_RETRY_WAIT_MIN="${TF_HTTP_RETRY_WAIT_MIN:-5}"
 export TF_IN_AUTOMATION=true
 
 apply() {
-  if ! terraform_is_at_least 0.13.2; then
-    tfplantool -f "${plan_cache}" backend set -k password -v "${TF_PASSWORD}"
-  fi
   terraform "${@}" -input=false "${plan_cache}"
 }
 

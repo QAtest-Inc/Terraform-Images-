@@ -4,7 +4,6 @@ variables:
   BUILD_IMAGE_NAME: "$CI_REGISTRY_IMAGE/branches/$CI_COMMIT_REF_SLUG-$TERRAFORM_VERSION:$CI_COMMIT_SHA"
   RELEASE_IMAGE_NAME: "$CI_REGISTRY_IMAGE/releases/$TERRAFORM_VERSION"
   TF_ADDRESS: "$CI_API_V4_URL/projects/$CI_PROJECT_ID/terraform/state/$CI_PIPELINE_IID-$STATE_NAME"
-  TFPLANTOOL_VERSION: "v0.1.1"
 
 .versions:
   parallel:
@@ -17,14 +16,6 @@ variables:
         TERRAFORM_BINARY_VERSION: "0.14.11"
         TERRAFORM_VERSION: "0.14"
         STATE_NAME: terraform014
-      - BASE_IMAGE: "alpine:3.13.1"
-        TERRAFORM_BINARY_VERSION: "0.13.7"
-        TERRAFORM_VERSION: "0.13"
-        STATE_NAME: terraform013
-      - BASE_IMAGE: "alpine:3.13.1"
-        TERRAFORM_BINARY_VERSION: "0.12.31"
-        TERRAFORM_VERSION: "0.12"
-        STATE_NAME: terraform012
 
 stages:
   - lint
@@ -66,7 +57,7 @@ build:
     - .versions
   stage: build
   script:
-    - docker image build --tag "$BUILD_IMAGE_NAME" --build-arg BASE_IMAGE=$BASE_IMAGE --build-arg TERRAFORM_BINARY_VERSION=$TERRAFORM_BINARY_VERSION --build-arg TFPLANTOOL_VERSION=$TFPLANTOOL_VERSION .
+    - docker image build --tag "$BUILD_IMAGE_NAME" --build-arg BASE_IMAGE=$BASE_IMAGE .
     - docker image push "$BUILD_IMAGE_NAME"
 
 .test:
@@ -105,7 +96,6 @@ test-plan:
   script:
     - gitlab-terraform plan
     - if [[ ! -f "plan.cache" ]]; then echo "expected to find a plan.cache file"; exit 1; fi
-    - tfplantool -f plan.cache backend get -k username
     - gitlab-terraform plan-json
     - if [[ ! -f "plan.json" ]]; then echo "expected to find a plan.json file"; exit 1; fi
     - mv plan.cache $TERRAFORM_VERSION-plan.cache
