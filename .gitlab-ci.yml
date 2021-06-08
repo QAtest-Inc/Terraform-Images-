@@ -9,7 +9,7 @@ variables:
 .versions:
   parallel:
     matrix:
-      - TERRAFORM_BINARY_VERSION: "0.15.3"
+      - TERRAFORM_BINARY_VERSION: "0.15.5"
         TERRAFORM_VERSION: "0.15"
         STATE_NAME: terraform015
       - TERRAFORM_BINARY_VERSION: "0.14.11"
