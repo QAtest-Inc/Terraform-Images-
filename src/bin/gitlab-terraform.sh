@@ -83,7 +83,9 @@ case "${1}" in
     apply "${@}"
   ;;
   "init")
-    init
+    # shift argument list „one to the left“ to not call 'terraform init init'
+    shift
+    init "${@}"
   ;;
   "plan")
     init
