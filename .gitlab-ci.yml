@@ -1,9 +1,11 @@
 variables:
-  STABLE_VERSION: "1.0"
-  STABLE_IMAGE_NAME: "$CI_REGISTRY_IMAGE/stable:latest"
   BASE_IMAGE: "alpine:3.13.1"
   BUILD_IMAGE_NAME: "$CI_REGISTRY_IMAGE/branches/$CI_COMMIT_REF_SLUG-$TERRAFORM_VERSION:$CI_COMMIT_SHA"
+  DOCKER_BUILDKIT: "1"
+  PLATFORMS: linux/amd64,linux/arm64
   RELEASE_IMAGE_NAME: "$CI_REGISTRY_IMAGE/releases/$TERRAFORM_VERSION"
+  STABLE_IMAGE_NAME: "$CI_REGISTRY_IMAGE/stable:latest"
+  STABLE_VERSION: "1.0"
   TF_ADDRESS: "$CI_API_V4_URL/projects/$CI_PROJECT_ID/terraform/state/$CI_PIPELINE_IID-$STATE_NAME"
 
 .versions:
@@ -49,21 +51,31 @@ dockerfile check:
   script:
     - hadolint Dockerfile
 
-.dind:
+build:
+  extends: .versions
+  stage: build
   services:
     - docker:20.10.6-dind
   image: docker:20.10.6
   before_script:
+    # Install buildx
+    - mkdir -p ~/.docker/cli-plugins
+    - wget https://github.com/docker/buildx/releases/download/v0.5.1/buildx-v0.5.1.linux-amd64 -O ~/.docker/cli-plugins/docker-buildx
+    - chmod a+x ~/.docker/cli-plugins/docker-buildx
+    # See https://www.docker.com/blog/multi-platform-docker-builds/
+    - docker run --rm --privileged docker/binfmt:a7996909642ee92942dcd6cff44b9b95f08dad64
+    # Registry auth
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
-
-build:
-  extends:
-    - .dind
-    - .versions
-  stage: build
   script:
-    - docker image build --tag "$BUILD_IMAGE_NAME" --build-arg BASE_IMAGE=$BASE_IMAGE --build-arg TERRAFORM_BINARY_VERSION=$TERRAFORM_BINARY_VERSION .
-    - docker image push "$BUILD_IMAGE_NAME"
+    - docker buildx create --use
+    - docker buildx build
+      --platform "$PLATFORMS"
+      --build-arg BASE_IMAGE=$BASE_IMAGE
+      --build-arg TERRAFORM_BINARY_VERSION=$TERRAFORM_BINARY_VERSION
+      --file Dockerfile
+      --tag "$BUILD_IMAGE_NAME"
+      --push
+      .
 
 .test:
   image: "$BUILD_IMAGE_NAME"
@@ -126,20 +138,18 @@ test-destroy:
     - gitlab-terraform destroy
 
 release:
-  extends:
-    - .dind
-    - .versions
+  extends: .versions
   stage: release
+  image:
+    name: gcr.io/go-containerregistry/crane:debug
+    entrypoint: [ "" ]
   script:
-    - docker image pull "$BUILD_IMAGE_NAME"
-    - docker image tag "$BUILD_IMAGE_NAME" "$RELEASE_IMAGE_NAME:latest"
-    - docker image tag "$BUILD_IMAGE_NAME" "$CI_REGISTRY_IMAGE/releases/terraform:$TERRAFORM_BINARY_VERSION"
-    - docker image tag "$BUILD_IMAGE_NAME" "$RELEASE_IMAGE_NAME:$CI_COMMIT_TAG"
-    - docker image push "$RELEASE_IMAGE_NAME:latest"
-    - docker image push "$CI_REGISTRY_IMAGE/releases/terraform:$TERRAFORM_BINARY_VERSION"
-    - docker image push "$RELEASE_IMAGE_NAME:$CI_COMMIT_TAG"
-    - if [ "$TERRAFORM_VERSION" = "$STABLE_VERSION" ]; then docker image tag "$BUILD_IMAGE_NAME" "$STABLE_IMAGE_NAME"; fi
-    - if [ "$TERRAFORM_VERSION" = "$STABLE_VERSION" ]; then docker image push "$STABLE_IMAGE_NAME"; fi
+    # https://github.com/google/go-containerregistry/blob/main/cmd/crane/doc/crane_copy.md
+    - crane auth login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+    - crane copy "$BUILD_IMAGE_NAME" "$RELEASE_IMAGE_NAME:latest"
+    - crane copy "$BUILD_IMAGE_NAME" "$CI_REGISTRY_IMAGE/releases/terraform:$TERRAFORM_BINARY_VERSION"
+    - crane copy "$BUILD_IMAGE_NAME" "$RELEASE_IMAGE_NAME:$CI_COMMIT_TAG"
+    - if [ "$TERRAFORM_VERSION" = "$STABLE_VERSION" ]; then crane copy "$BUILD_IMAGE_NAME" "$STABLE_IMAGE_NAME"; fi
   only:
     - tags
 

@@ -2,13 +2,15 @@ ARG BASE_IMAGE
 
 FROM $BASE_IMAGE
 
+ARG TARGETARCH
+
 ARG TERRAFORM_BINARY_VERSION
 
 RUN apk add --no-cache jq curl git openssh
 
 WORKDIR /tmp
 
-RUN ( curl -sLo terraform.zip "https://releases.hashicorp.com/terraform/${TERRAFORM_BINARY_VERSION}/terraform_${TERRAFORM_BINARY_VERSION}_linux_amd64.zip" && \
+RUN ( curl -sLo terraform.zip "https://releases.hashicorp.com/terraform/${TERRAFORM_BINARY_VERSION}/terraform_${TERRAFORM_BINARY_VERSION}_linux_${TARGETARCH}.zip" && \
       unzip terraform.zip && \
       rm terraform.zip && \
       mv ./terraform /usr/local/bin/terraform \
