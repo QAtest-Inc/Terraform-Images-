@@ -1,5 +1,5 @@
 variables:
-  BASE_IMAGE: "alpine:3.13.1"
+  BASE_IMAGE: "alpine:3.14.0"
   BUILD_IMAGE_NAME: "$CI_REGISTRY_IMAGE/branches/$CI_COMMIT_REF_SLUG-$TERRAFORM_VERSION:$CI_COMMIT_SHA"
   DOCKER_BUILDKIT: "1"
   PLATFORMS: linux/amd64,linux/arm64
@@ -11,7 +11,7 @@ variables:
 .versions:
   parallel:
     matrix:
-      - TERRAFORM_BINARY_VERSION: "1.0.0"
+      - TERRAFORM_BINARY_VERSION: "1.0.3"
         TERRAFORM_VERSION: "1.0"
         STATE_NAME: terraform10
       - TERRAFORM_BINARY_VERSION: "0.15.5"
@@ -60,7 +60,7 @@ build:
   before_script:
     # Install buildx
     - mkdir -p ~/.docker/cli-plugins
-    - wget https://github.com/docker/buildx/releases/download/v0.5.1/buildx-v0.5.1.linux-amd64 -O ~/.docker/cli-plugins/docker-buildx
+    - wget https://github.com/docker/buildx/releases/download/v0.6.0/buildx-v0.6.0.linux-amd64 -O ~/.docker/cli-plugins/docker-buildx
     - chmod a+x ~/.docker/cli-plugins/docker-buildx
     # See https://www.docker.com/blog/multi-platform-docker-builds/
     - docker run --rm --privileged docker/binfmt:a7996909642ee92942dcd6cff44b9b95f08dad64
