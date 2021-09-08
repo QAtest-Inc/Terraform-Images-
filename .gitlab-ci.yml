@@ -28,6 +28,7 @@ stages:
   - lint
   - build
   - test-init
+  - test-fmt
   - test-validate
   - test-plan
   - test-apply
@@ -96,6 +97,14 @@ test-init:
   script:
     - export DEBUG_OUTPUT=true
     - gitlab-terraform init
+
+test-fmt:
+  extends:
+    - .test
+    - .versions
+  stage: test-fmt
+  script:
+    - gitlab-terraform fmt
 
 test-validate:
   extends:

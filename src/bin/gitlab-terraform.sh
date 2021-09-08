@@ -50,14 +50,6 @@ export TF_HTTP_RETRY_WAIT_MIN="${TF_HTTP_RETRY_WAIT_MIN:-5}"
 # Use terraform automation mode (will remove some verbose unneeded messages)
 export TF_IN_AUTOMATION=true
 
-apply() {
-  terraform "${@}" -input=false "${plan_cache}"
-}
-
-destroy() {
-  terraform "${@}" -auto-approve
-}
-
 init() {
   if [ -n "${TF_HTTP_ADDRESS}" ] && ! terraform_is_at_least 0.13.2; then
     set -- \
@@ -70,17 +62,20 @@ init() {
       -backend-config=unlock_method="${TF_HTTP_UNLOCK_METHOD}" \
       -backend-config=retry_wait_min="${TF_HTTP_RETRY_WAIT_MIN}"
   fi
-  terraform init "${@}" -reconfigure
+  terraform init "${@}" -input=false -reconfigure
 }
 
 case "${1}" in
-  "validate")
-    init
-    terraform "${@}"
-  ;;
   "apply")
     init
-    apply "${@}"
+    terraform "${@}" -input=false "${plan_cache}"
+  ;;
+  "destroy")
+    init
+    terraform "${@}" -auto-approve
+  ;;
+  "fmt")
+    terraform "${@}" -check -diff -recursive
   ;;
   "init")
     # shift argument list „one to the left“ to not call 'terraform init init'
@@ -96,9 +91,9 @@ case "${1}" in
       jq -r "${JQ_PLAN}" \
       > "${plan_json}"
   ;;
-  "destroy")
-    init
-    destroy "${@}"
+  "validate")
+    init -backend=false
+    terraform "${@}"
   ;;
   *)
     terraform "${@}"
