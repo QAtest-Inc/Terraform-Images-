@@ -163,7 +163,7 @@ release:
     - tags
 
 .semantic-release:
-  image: node:12-buster-slim
+  image: node:16-buster-slim
   stage: prepare-release
   before_script:
     - apt-get update && apt-get install -y --no-install-recommends git-core ca-certificates
